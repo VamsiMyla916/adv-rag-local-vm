@@ -1,0 +1,15 @@
+Project Name: Advanced RAG Chatbot
+
+This project is a Retrieval-Augmented Generation (RAG) system built with Python, FastAPI, and Docker. It uses a Streamlit frontend for the user interface.
+
+The core technology is a pipeline that retrieves relevant context from a knowledge base and feeds it to a Large Language Model (LLM) to generate an accurate answer. This "grounding" on factual data helps to prevent LLM hallucinations.
+
+This project implements advanced features like re-ranking. Re-ranking is a process where an initial set of 10 retrieved documents is re-scored by a more powerful CrossEncoder model. This model, 'BAAI/bge-reranker-base', finds the top 3 most relevant documents, which dramatically increases answer accuracy.
+
+The backend is containerized using Docker. This was a key decision to solve dependency issues and to manage the heavy resource requirements of the LLM. By separating the UI from the backend API, the application can be scaled easily and run on any system, even a 16GB laptop.
+
+The LLM used for generation is a quantized GGUF version of gemma-2b-it ('TheBloke/gemma-2b-it-GGUF'). This model was chosen because it is compressed to be very small (about 1.4GB) and can run efficiently on a CPU, making it perfect for both local testing and free cloud deployment.
+
+The retrieval system is built using FAISS. The script first checks if an index file ('faiss_index.index') exists. If not, it reads this data.txt file, splits it into chunks, and uses an embedding model ('all-MiniLM-L6-v2') to create vectors. These vectors are then saved into the FAISS index for fast retrieval on all future runs.
+
+This RAG pipeline also includes a "Relevance Guard". After re-ranking, the app checks the score of the top document. If its relevance score is below a certain threshold (0.5), the app will not send the context to the LLM. Instead, it will reply "I'm sorry, I don't have enough relevant information," which prevents it from making up an answer.
